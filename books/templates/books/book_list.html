@@ -1,0 +1,55 @@
+{% load i18n %}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% trans "Book List" %}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-4">
+        <h1 class="text-center">{% trans "Book List" %}</h1>
+
+        <!-- Панель с кнопками -->
+        <div class="d-flex justify-content-between mb-3">
+            <a href="{% url 'add_book' %}" class="btn btn-success">{% trans "Add Book" %}</a>
+
+            {% if user.is_authenticated %}
+                <a href="{% url 'logout' %}" class="btn btn-danger">{% trans "Logout" %}</a>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn btn-primary">{% trans "Login" %}</a>
+            {% endif %}
+        </div>
+
+        <div class="row">
+            {% for book in books %}
+                <div class="col-md-4">
+                    <div class="card mb-4">
+                        {% if book.cover %}
+                            <img src="{{ book.cover.url }}" class="card-img-top" alt="{{ book.title }}">
+                        {% else %}
+                            <img src="https://via.placeholder.com/150" class="card-img-top" alt="{% trans 'No cover available' %}">
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <a href="{% url 'book_detail' book.id %}">{{ book.title }}</a>
+                            </h5>
+                            <p class="card-text"><strong>{% trans "Author" %}:</strong> {{ book.author }}</p>
+                            <p class="card-text"><strong>{% trans "Genres" %}:</strong> 
+                                {% for genre in book.genre.all %}
+                                    {{ genre.name }}{% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+                            </p>
+                            <p class="card-text"><strong>{% trans "Published Date" %}:</strong> {{ book.published_date }}</p>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <p class="text-center">{% trans "No books available." %}</p>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
