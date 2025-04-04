@@ -19,14 +19,14 @@ class Genre(models.Model):
 class Book(models.Model):
     title = models.CharField(max_length=200)
     author = models.ForeignKey(Author, on_delete=models.CASCADE)  # Связь с автором
-    genres = models.ManyToManyField(Genre,  blank=True)  # Связь многие-ко-многим с жанрами
-    cover = models.ImageField(upload_to='book_covers/', blank=True, null=True)  # Обложка книги
+    genres = models.ManyToManyField(Genre, blank=True)  # Многие ко многим
+    cover = models.ImageField(upload_to='book_covers/', blank=True, null=True)  # Обложка
     published_date = models.DateField(null=True, blank=True)  # Дата публикации
 
     def __str__(self):
         return self.title
 
-class Meta:
+    class Meta:
         permissions = [
             ("can_edit_books", "Can add, edit, and delete books"),
         ]

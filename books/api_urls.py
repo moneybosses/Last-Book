@@ -14,7 +14,7 @@ urlpatterns = [
     path('import/xml/', import_books_xml, name='import_books_xml'),
     path('import/yaml/', import_books_yaml, name='import_books_yaml'),
     path('cached-books/', CachedBookListView.as_view(), name='cached_books'),
-     path('book/<int:pk>/', get_book_details, name='book_details'),
+    path('book/<int:pk>/', get_book_details, name='book_details'),
 
 
 

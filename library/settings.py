@@ -211,3 +211,10 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:8000",
     "http://localhost:8000"
 ]
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Library API',
+    'DESCRIPTION': 'Полноценное API для книг, авторов и жанров',
+    'VERSION': '1.0.0',
+}
+
