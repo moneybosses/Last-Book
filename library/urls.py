@@ -22,10 +22,12 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.conf.urls.i18n import set_language
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
+from books.views import book_list  # Import book_list from the appropriate module
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    
+    path('books/', book_list, name='book_list'),
+
     # Web-маршруты
     path('', include('books.urls')),
     path('users/', include('users.urls')),
@@ -38,7 +40,7 @@ urlpatterns = [
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     
     path("api/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
-    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+    #path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/schema/swagger-ui/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
 
     # API endpoints (включаем только один раз)

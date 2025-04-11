@@ -7,6 +7,7 @@ from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
 
 def register(request):
+
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():

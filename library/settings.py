@@ -147,6 +147,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+
+
 LANGUAGES = [
     ('en', _('English')),
     ('ru', _('Русский')),
@@ -216,5 +218,7 @@ SPECTACULAR_SETTINGS = {
     'TITLE': 'Library API',
     'DESCRIPTION': 'Полноценное API для книг, авторов и жанров',
     'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,  # Скрываем /api/schema/ из документации
+
 }
 

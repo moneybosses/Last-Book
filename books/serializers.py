@@ -36,6 +36,9 @@ class BookSerializer(serializers.ModelSerializer):
         queryset=Genre.objects.all(), source='genres', many=True, write_only=True
     )
 
+    cover = serializers.ImageField(required=False)  # поле для загрузки изображения (обложка книги)
+    published_date = serializers.DateField(required=False)  # дата публикации книги
+
     class Meta:
         model = Book
         fields = [

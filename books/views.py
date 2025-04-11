@@ -26,6 +26,7 @@ from .forms import BookForm
 from .serializers import BookSerializer, AuthorSerializer, GenreSerializer, UserSerializer
 from .permissions import IsLibrarianOrReadOnly
 from .filters import BookFilter
+from rest_framework.parsers import MultiPartParser, FormParser
 
 logger = logging.getLogger(__name__)
 
@@ -87,6 +88,7 @@ def delete_book(request, book_id):
 
 # =================== DRF API-ПРЕДСТАВЛЕНИЯ ===================
 
+@extend_schema(tags=["Книги"])
 class BookListCreateView(generics.ListCreateAPIView):
     """Список книг с фильтрацией и поиском"""
     queryset = Book.objects.all()
@@ -96,11 +98,10 @@ class BookListCreateView(generics.ListCreateAPIView):
     filterset_class = BookFilter
     search_fields = ['title', 'author__name']
     ordering_fields = ['title', 'author__name']
+    parser_classes = [MultiPartParser, FormParser]  # Добавьте эту строку
 
 
-@extend_schema_view(
-    update=extend_schema(exclude=True)
-)
+@extend_schema(tags=["Книги"])
 class BookDetailView(generics.RetrieveUpdateDestroyAPIView):
     """Просмотр одной книги, редактирование - только библиотекарям"""
     queryset = Book.objects.all()
@@ -108,6 +109,7 @@ class BookDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsLibrarianOrReadOnly]
 
 
+@extend_schema(tags=["Пользователи"])
 class RegisterView(APIView):
     """Регистрация пользователей"""
     permission_classes = [AllowAny]
@@ -167,7 +169,7 @@ def import_books_yaml(request):
 
 
 # =================== КЕШИРОВАНИЕ ===================
-
+@extend_schema(exclude=True)
 class CachedBookListView(generics.ListAPIView):
     """Список книг с кешированием"""
     queryset = Book.objects.all()
@@ -176,7 +178,6 @@ class CachedBookListView(generics.ListAPIView):
     @method_decorator(cache_page(60 * 15))
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
-
 
 def get_book_details(request, pk):
     """Получение информации о книге с кешированием"""
@@ -196,6 +197,7 @@ def get_book_details(request, pk):
     summary="Получить список книг",
     description="Возвращает список всех книг в библиотеке.",
     responses={200: "application/json"},
+    tags=["Swagger-Тест"]
 )
 @api_view(["GET"])
 def book_list_api(request):
@@ -203,15 +205,39 @@ def book_list_api(request):
     return Response({"books": books})
 
 
-# =================== ViewSets для Swagger ===================
+# =================== ViewSets ===================
 
 @extend_schema_view(
-    list=extend_schema(summary="Список книг"),
-    create=extend_schema(summary="Добавить книгу"),
-    retrieve=extend_schema(summary="Получить книгу"),
-    update=extend_schema(summary="Обновить книгу"),
-    partial_update=extend_schema(summary="Частичное обновление книги"),
-    destroy=extend_schema(summary="Удалить книгу"),
+    list=extend_schema(summary="Список книг", tags=["Книги"]),
+    create=extend_schema(summary="Добавить книгу", tags=["Книги"]),
+    retrieve=extend_schema(summary="Получить книгу", tags=["Книги"]),
+    update=extend_schema(summary="Обновить книгу", tags=["Книги"]),
+    partial_update=extend_schema(summary="Частичное обновление книги", tags=["Книги"]),
+    destroy=extend_schema(summary="Удалить книгу", tags=["Книги"]),
+)
+@extend_schema_view(
+    list=extend_schema(summary="Список книг", tags=["Книги"]),
+    create=extend_schema(
+        summary="Добавить книгу",
+        tags=["Книги"],
+        request={
+            'multipart/form-data': {
+                'type': 'object',
+                'properties': {
+                    'title': {'type': 'string'},
+                    'author_id': {'type': 'integer'},
+                    'genre_ids': {'type': 'array', 'items': {'type': 'integer'}},
+                    'cover': {'type': 'string', 'format': 'binary'},  # Ключевое изменение!
+                    'published_date': {'type': 'string', 'format': 'date'},
+                }
+            }
+        },
+        responses={201: BookSerializer},
+    ),
+    retrieve=extend_schema(summary="Получить книгу", tags=["Книги"]),
+    update=extend_schema(summary="Обновить книгу", tags=["Книги"]),
+    partial_update=extend_schema(summary="Частичное обновление книги", tags=["Книги"]),
+    destroy=extend_schema(summary="Удалить книгу", tags=["Книги"]),
 )
 class BookViewSet(viewsets.ModelViewSet):
     queryset = Book.objects.all()
@@ -221,15 +247,15 @@ class BookViewSet(viewsets.ModelViewSet):
     filterset_class = BookFilter
     search_fields = ['title', 'author__name']
     ordering_fields = ['title', 'author__name']
-
+    parser_classes = [MultiPartParser, FormParser]
 
 @extend_schema_view(
-    list=extend_schema(summary="Список авторов"),
-    create=extend_schema(summary="Добавить автора"),
-    retrieve=extend_schema(summary="Получить автора"),
-    update=extend_schema(summary="Обновить автора"),
-    partial_update=extend_schema(summary="Частичное обновление автора"),
-    destroy=extend_schema(summary="Удалить автора"),
+    list=extend_schema(summary="Список авторов", tags=["Авторы"]),
+    create=extend_schema(summary="Добавить автора", tags=["Авторы"]),
+    retrieve=extend_schema(summary="Получить автора", tags=["Авторы"]),
+    update=extend_schema(summary="Обновить автора", tags=["Авторы"]),
+    partial_update=extend_schema(summary="Частичное обновление автора", tags=["Авторы"]),
+    destroy=extend_schema(summary="Удалить автора", tags=["Авторы"]),
 )
 class AuthorViewSet(viewsets.ModelViewSet):
     queryset = Author.objects.all()
@@ -238,14 +264,15 @@ class AuthorViewSet(viewsets.ModelViewSet):
 
 
 @extend_schema_view(
-    list=extend_schema(summary="Список жанров"),
-    create=extend_schema(summary="Добавить жанр"),
-    retrieve=extend_schema(summary="Получить жанр"),
-    update=extend_schema(summary="Обновить жанр"),
-    partial_update=extend_schema(summary="Частичное обновление жанра"),
-    destroy=extend_schema(summary="Удалить жанр"),
+    list=extend_schema(summary="Список жанров", tags=["Жанры"]),
+    create=extend_schema(summary="Добавить жанр", tags=["Жанры"]),
+    retrieve=extend_schema(summary="Получить жанр", tags=["Жанры"]),
+    update=extend_schema(summary="Обновить жанр", tags=["Жанры"]),
+    partial_update=extend_schema(summary="Частичное обновление жанра", tags=["Жанры"]),
+    destroy=extend_schema(summary="Удалить жанр", tags=["Жанры"]),
 )
 class GenreViewSet(viewsets.ModelViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = [IsLibrarianOrReadOnly]
+
