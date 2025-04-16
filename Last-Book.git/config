@@ -1,0 +1,13 @@
+[core]
+	repositoryformatversion = 0
+	filemode = false
+	bare = true
+	symlinks = false
+	ignorecase = true
+[remote "origin"]
+	url = https://github.com/moneybosses/Last-Book.git
+	fetch = +refs/*:refs/*
+	mirror = true
+[remote "gitlab"]
+	url = https://gitlab.com/ai5951415/my-django-backend.git
+	fetch = +refs/heads/*:refs/remotes/gitlab/*
